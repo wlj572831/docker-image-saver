@@ -1,24 +1,32 @@
-name: Pull and Export Docker Image
+name: Pull and Export Docker Image (GHCR)
 
 on:
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
     inputs:
       image_name:
-        description: '镜像名称 (例如 keephq/keep:latest)'
+        description: '镜像名称 (默认为 GHCR 地址)'
         required: true
-        default: 'ghcr.io/keephq/keep'
+        default: 'ghcr.io/keephq/keep:latest'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 登录 GitHub Container Registry (拉取非公开镜像可能需要)
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pull Docker Image
         run: docker pull ${{ github.event.inputs.image_name }}
 
       - name: Save Image to Tar
         run: docker save -o image.tar ${{ github.event.inputs.image_name }}
 
-      - name: Compress Image (Optional)
+      - name: Compress Image
         run: gzip image.tar
 
       - name: Upload Artifact
