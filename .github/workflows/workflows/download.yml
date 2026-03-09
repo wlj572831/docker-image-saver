@@ -1,0 +1,28 @@
+name: Pull and Export Docker Image
+
+on:
+  workflow_dispatch: # 允许手动触发
+    inputs:
+      image_name:
+        description: '镜像名称 (例如 keephq/keep:latest)'
+        required: true
+        default: 'keephq/keep:latest'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Docker Image
+        run: docker pull ${{ github.event.inputs.image_name }}
+
+      - name: Save Image to Tar
+        run: docker save -o image.tar ${{ github.event.inputs.image_name }}
+
+      - name: Compress Image (Optional)
+        run: gzip image.tar
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-tar
+          path: image.tar.gz
