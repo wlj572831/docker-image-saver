@@ -6,7 +6,7 @@ on:
       image_name:
         description: '镜像名称 (例如 keephq/keep:latest)'
         required: true
-        default: 'keephq/keep:latest'
+        default: 'ghcr.io/keephq/keep'
 
 jobs:
   build:
